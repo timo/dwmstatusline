@@ -51,10 +51,10 @@ def memory_free():
     free_output = Popen(["free"], stdout=PIPE).communicate()[0]
     # get the interesting lines
     interesting = free_output.split("\n")[1:]
-    total_ram = float(interesting[0].split()[0])
-    used_ram = total_ram / int(interesting[1].split()[2])
+    total_ram = float(interesting[0].split()[1])
+    used_ram = int(interesting[1].split()[2]) / total_ram
     total_swap = float(interesting[2].split()[1])
-    used_swap = total_swap / int(interesting[2].split()[2])
+    used_swap = int(interesting[2].split()[2]) / total_swap
 
     yield animate(5, pretty_progressbar(used_ram, 80))
     
@@ -70,19 +70,18 @@ def memory_free():
 
 @transition_func
 def shoot(prev, new):
-    d = 0.1
+    d = 0.5
     icon = "*"
     length = max(len(prev), len(new))
 
-    def lcut(s, l):
-        if l > len(s):
-            return ""
-        else:
-            return s[:l]
+    if len(prev) < len(new):
+        prev = " " * (len(new) - len(prev)) + prev
+    elif len(new) < len(prev):
+        new = " " * (len(prev) - len(new)) + new
 
-    yield wait(d, prev[:-1] + icon)
+    yield wait(d, icon + prev[1:])
     for pos in range(length):
-        yield wait(d, lcut(prev, pos) + icon + new[:-pos])
+        yield wait(d, new[:pos-1] + icon + prev[pos:])
         d *= 0.9
     
     yield next_function()
@@ -94,7 +93,7 @@ def animate_trans(fr, to):
         sleep(delay)
 
 def startup_animation():
-    yield animate(1, "DWM Status Bar animator")
+    yield wait(1, "DWM Status Bar Animator")
     yield animate(1, "a silly script by timonator")
     yield next_function()
 
@@ -116,6 +115,7 @@ def run_statuses(startfunc):
         elif cmd > 0:
             sleep(cmd)
         elif cmd < 0:
+            dwm_set_status(ptext)
             sleep(-cmd)
             animate_trans(ptext, text)
 

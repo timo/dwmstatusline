@@ -16,11 +16,11 @@ def pretty_progressbar(fraction, charsize):
 
     # Make sure it's round so that we don't accidentally have wiggly status
     # bars.
-    bar1size = int(percent * charsize)
+    bar1size = int(fraction * charsize)
     bar2size = charsize - bar1size
 
     return "[%s%s%s] %03d%%" % (
       "=" * bar1size,
-      "∗",
+      "O",
       " " * bar2size,
-      percent)
+      fraction * 100)
