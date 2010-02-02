@@ -26,12 +26,6 @@ def transition_func(func):
 def dwm_set_status(text):
     Popen(["xsetroot", "-name", text])
 
-import sys
-def dwm_set_status(text):
-    sys.stdout.write('\r' + ' ' * 80 + '\r')
-    sys.stdout.write(text)
-    sys.stdout.flush()
-
 def animate(delay, text):
     previous = yield PREVIOUS
     animator = choice(_transitions)
