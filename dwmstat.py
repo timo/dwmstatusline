@@ -61,7 +61,23 @@ def memory_free():
     yield animate(5, "Used Swap Space")
     yield animate(5, pretty_progressbar(used_swap, 80))
 
-    yield next_function()
+@status_func
+def mpd_np():
+    try:
+        status_output = Popen(["mpc", "status"], stdout=PIPE).communicate()[0]
+    except OSError:
+        yield wait(5, "mpc not installed :(")
+        return
+
+    result = ""
+
+    lines = status_output.split("\n")
+    if len(lines) == 1: # stopped
+        yield wait(5, "MPD stopped")
+    else:
+        result += "MPD " + lines[1].split()[0] + " " + lines[0].strip()
+        yield animate(5, result)
+        yield animate(5, lines[1].split()[2])
 
 
 # install a few transition functions
@@ -70,7 +86,7 @@ def memory_free():
 
 @transition_func
 def shoot(prev, new):
-    d = 0.5
+    d = 0.05
     icon = "*"
     length = max(len(prev), len(new))
 
@@ -80,11 +96,10 @@ def shoot(prev, new):
         new = " " * (len(prev) - len(new)) + new
 
     yield wait(d, icon + prev[1:])
-    for pos in range(length):
-        yield wait(d, new[:pos-1] + icon + prev[pos:])
-        d *= 0.9
-    
-    yield next_function()
+    for pos in range(0, length, 2):
+        yield wait(d, (new[:pos-1] + icon + prev[pos:]).lstrip())
+   
+    yield wait(1, new.lstrip())
 
 def animate_trans(fr, to):
     animator = choice(_transitions)(fr, to)
@@ -95,7 +110,6 @@ def animate_trans(fr, to):
 def startup_animation():
     yield wait(1, "DWM Status Bar Animator")
     yield animate(1, "a silly script by timonator")
-    yield next_function()
 
 def run_statuses(startfunc):
     func = startfunc()
@@ -109,8 +123,9 @@ def run_statuses(startfunc):
             (cmd, text) = next_function()
 
         if cmd == 0:
-            func = choice(_statuses)()
-            (cmd, text) = func.next()
+            func = choice(_statuses)
+            print func
+            func = func()
 
         elif cmd > 0:
             sleep(cmd)
@@ -123,4 +138,6 @@ def run_statuses(startfunc):
 
 
 if __name__ == "__main__":
+    print _statuses
+
     run_statuses(startup_animation)
