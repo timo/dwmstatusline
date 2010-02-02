@@ -5,6 +5,8 @@ from random import choice
 
 from utils import *
 
+PREVIOUS = object()
+
 _statuses = []
 _transitions = []
 
@@ -24,9 +26,21 @@ def transition_func(func):
 def dwm_set_status(text):
     Popen(["xsetroot", "-name", text])
 
-next_function = lambda: (0, "")
-animate = lambda delay, text: (-delay, text)
-wait = lambda delay, text: (delay, text)
+import sys
+def dwm_set_status(text):
+    sys.stdout.write('\r' + ' ' * 80 + '\r')
+    sys.stdout.write(text)
+    sys.stdout.flush()
+
+def animate(delay, text):
+    previous = yield PREVIOUS
+    animator = choice(_transitions)
+    yield animator(previous, text)
+    sleep(delay)
+
+def wait(delay, text):
+    yield text
+    sleep(delay)
 
 
 # install a few status functions
@@ -61,7 +75,7 @@ def memory_free():
     yield animate(5, "Used Swap Space")
     yield animate(5, pretty_progressbar(used_swap, 80))
 
-@status_func
+#@status_func
 def mpd_np():
     try:
         status_output = Popen(["mpc", "status"], stdout=PIPE).communicate()[0]
@@ -72,7 +86,7 @@ def mpd_np():
     result = ""
 
     lines = status_output.split("\n")
-    if len(lines) == 1: # stopped
+    if len(lines) < 3: # stopped
         yield wait(5, "MPD stopped")
     else:
         result += "MPD " + lines[1].split()[0] + " " + lines[0].strip()
@@ -90,54 +104,43 @@ def shoot(prev, new):
     icon = "*"
     length = max(len(prev), len(new))
 
-    if len(prev) < len(new):
-        prev = " " * (len(new) - len(prev)) + prev
-    elif len(new) < len(prev):
-        new = " " * (len(prev) - len(new)) + new
-
-    yield wait(d, icon + prev[1:])
     for pos in range(0, length, 2):
-        yield wait(d, (new[:pos-1] + icon + prev[pos:]).lstrip())
-   
-    yield wait(1, new.lstrip())
+        padding = max(length - pos - 1 - len(prev), 0)
+        old = prev[-(length - pos - padding):]
+        yield wait(d, new[:pos] + ' ' * padding + old)
 
-def animate_trans(fr, to):
-    animator = choice(_transitions)(fr, to)
-    for (delay, text) in animator:
-        dwm_set_status(text)
-        sleep(delay)
+    yield wait(1, new.lstrip())
 
 def startup_animation():
     yield wait(1, "DWM Status Bar Animator")
     yield animate(1, "a silly script by timonator")
 
+def run_animation(iter_, previous):
+    yield previous
+    yield iter_.send(previous)
+    for value in iter_:
+        yield value
+
 def run_statuses(startfunc):
-    func = startfunc()
-    (cmd, text) = func.next()
+    iters = [startfunc()]
+    previous = ''
 
     while True:
-        pcmd, ptext = cmd, text
-        try:
-            (cmd, text) = func.next()
-        except StopIteration:
-            (cmd, text) = next_function()
-
-        if cmd == 0:
-            func = choice(_statuses)
-            print func
-            func = func()
-
-        elif cmd > 0:
-            sleep(cmd)
-        elif cmd < 0:
-            dwm_set_status(ptext)
-            sleep(-cmd)
-            animate_trans(ptext, text)
-
-        dwm_set_status(text)
+        while iters:
+            iter_ = iters.pop()
+            for value in iter_:
+                if isinstance(value, basestring):
+                    dwm_set_status(value)
+                    previous = value
+                elif value is PREVIOUS:
+                    iters.append(run_animation(iter_, previous))
+                    break
+                else:
+                    iters.append(iter_)
+                    iters.append(value)
+                    break
+        iters.append(choice(_statuses)())
 
 
 if __name__ == "__main__":
-    print _statuses
-
     run_statuses(startup_animation)
