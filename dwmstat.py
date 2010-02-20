@@ -11,7 +11,7 @@ PREVIOUS = object()
 
 def animate(delay, text):
     previous = yield PREVIOUS
-    animator = choice(_transitions)
+    animator = choice(transitions)
     yield animator(previous, text)
     sleep(delay)
 
@@ -35,7 +35,7 @@ def wait(delay, text):
 # Free memory function
 @status_func
 def memory_free():
-    yield animate(5, "Used RAM")
+    yield animate(2, "Used RAM")
     
     # Parse the output of the "free" command. :(
     free_output = Popen(["free"], stdout=PIPE).communicate()[0]
@@ -46,10 +46,10 @@ def memory_free():
     total_swap = float(interesting[2].split()[1])
     used_swap = int(interesting[2].split()[2]) / total_swap
 
-    yield animate(5, pretty_progressbar(used_ram, 80))
+    yield animate(10, pretty_progressbar(used_ram, 80))
     
-    yield animate(5, "Used Swap Space")
-    yield animate(5, pretty_progressbar(used_swap, 80))
+    yield animate(2, "Used Swap Space")
+    yield animate(10, pretty_progressbar(used_swap, 80))
 
 @register_if_installed("mpc")
 def mpd_np():
@@ -63,11 +63,11 @@ def mpd_np():
 
     lines = status_output.split("\n")
     if len(lines) < 3: # stopped
-        yield wait(5, "MPD stopped")
+        yield wait(10, "MPD stopped")
     else:
         result += "MPD " + lines[1].split()[0] + " " + lines[0].strip()
-        yield animate(5, result)
-        yield animate(5, lines[1].split()[2])
+        yield animate(10, result)
+        yield animate(10, lines[1].split()[2])
 
 @register_if_installed("acpi")
 def battery():
@@ -124,7 +124,7 @@ def run_statuses(startfunc):
                     iters.append(iter_)
                     iters.append(value)
                     break
-        iters.append(choice(_statuses)())
+        iters.append(choice(statuses)())
 
 
 if __name__ == "__main__":

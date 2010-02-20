@@ -26,24 +26,25 @@ def pretty_progressbar(fraction, charsize):
       " " * bar2size,
       fraction * 100)
 
-_statuses = []
-_transitions = []
+statuses = []
+transitions = []
 
 # A decorator to add a function to our statuses list.
 def status_func(func):
-    global _statuses
-    _statuses.append(func)
+    global statuses
+    statuses.append(func)
     return func
 
-def register_if_installed(func, command):
+def register_if_installed(command):
     if call(["which", command]) == 0:
-        func = transition_func(func)
-    return func
+        return status_func
+    else:
+        return lambda x: x
 
 # A decorator to add a function to our transitions list.
 def transition_func(func):
-    global _transitions
-    _transitions.append(func)
+    global transitions
+    transitions.append(func)
     return func
 
 # This function allows us to set the text of the status line.
