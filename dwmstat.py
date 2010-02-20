@@ -5,26 +5,9 @@ from random import choice
 
 from utils import *
 
+STATUSDELAY = 30
+
 PREVIOUS = object()
-
-_statuses = []
-_transitions = []
-
-# A decorator to add a function to our statuses list.
-def status_func(func):
-    global _statuses
-    _statuses.append(func)
-    return func
-
-# A decorator to add a function to our transitions list.
-def transition_func(func):
-    global _transitions
-    _transitions.append(func)
-    return func
-
-# This function allows us to set the text of the status line.
-def dwm_set_status(text):
-    Popen(["xsetroot", "-name", text])
 
 def animate(delay, text):
     previous = yield PREVIOUS
@@ -35,7 +18,6 @@ def animate(delay, text):
 def wait(delay, text):
     yield text
     sleep(delay)
-
 
 # install a few status functions
 
@@ -69,7 +51,7 @@ def memory_free():
     yield animate(5, "Used Swap Space")
     yield animate(5, pretty_progressbar(used_swap, 80))
 
-@status_func
+@register_if_installed("mpc")
 def mpd_np():
     try:
         status_output = Popen(["mpc", "status"], stdout=PIPE).communicate()[0]
@@ -87,7 +69,7 @@ def mpd_np():
         yield animate(5, result)
         yield animate(5, lines[1].split()[2])
 
-@status_func
+@register_if_installed("acpi")
 def battery():
     try:
         status_output = Popen(["acpi"], stdout=PIPE).communicate()[0]
