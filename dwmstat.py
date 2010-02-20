@@ -69,7 +69,7 @@ def memory_free():
     yield animate(5, "Used Swap Space")
     yield animate(5, pretty_progressbar(used_swap, 80))
 
-#@status_func
+@status_func
 def mpd_np():
     try:
         status_output = Popen(["mpc", "status"], stdout=PIPE).communicate()[0]
@@ -87,6 +87,15 @@ def mpd_np():
         yield animate(5, result)
         yield animate(5, lines[1].split()[2])
 
+@status_func
+def battery():
+    try:
+        status_output = Popen(["acpi"], stdout=PIPE).communicate()[0]
+    except OSError:
+        yield wait(5, "battery status could not be determined.")
+        return
+    
+    yield animate(10, status_output.split("\n")[0])
 
 # install a few transition functions
 
