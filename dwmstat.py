@@ -3,7 +3,7 @@ from subprocess import Popen, PIPE
 from time import sleep
 from random import choice
 
-from utils import *
+import utils
 
 STATUSDELAY = 30
 
@@ -11,7 +11,7 @@ PREVIOUS = object()
 
 def animate(delay, text):
     previous = yield PREVIOUS
-    animator = choice(transitions)
+    animator = choice(utils.transitions)
     yield animator(previous, text)
     sleep(delay)
 
@@ -33,7 +33,7 @@ def wait(delay, text):
 # free hard drive storage
 
 # Free memory function
-@status_func
+@utils.status_func
 def memory_free():
     yield animate(2, "Used RAM")
     
@@ -46,12 +46,12 @@ def memory_free():
     total_swap = float(interesting[2].split()[1])
     used_swap = int(interesting[2].split()[2]) / total_swap
 
-    yield animate(10, pretty_progressbar(used_ram, 80))
+    yield animate(10, utils.pretty_progressbar(used_ram, 80))
     
     yield animate(2, "Used Swap Space")
-    yield animate(10, pretty_progressbar(used_swap, 80))
+    yield animate(10, utils.pretty_progressbar(used_swap, 80))
 
-@register_if_installed("mpc")
+@utils.register_if_installed("mpc")
 def mpd_np():
     try:
         status_output = Popen(["mpc", "status"], stdout=PIPE).communicate()[0]
@@ -69,7 +69,7 @@ def mpd_np():
         yield animate(10, result)
         yield animate(10, lines[1].split()[2])
 
-@register_if_installed("acpi")
+@utils.register_if_installed("acpi")
 def battery():
     try:
         status_output = Popen(["acpi"], stdout=PIPE).communicate()[0]
@@ -83,7 +83,7 @@ def battery():
 
 # These work in the same way as the status functions
 
-@transition_func
+@utils.transition_func
 def shoot(prev, new):
     d = 0.05
     icon = "*"
@@ -115,7 +115,7 @@ def run_statuses(startfunc):
             iter_ = iters.pop()
             for value in iter_:
                 if isinstance(value, basestring):
-                    dwm_set_status(value)
+                    utils.dwm_set_status(value)
                     previous = value
                 elif value is PREVIOUS:
                     iters.append(run_animation(iter_, previous))
@@ -124,7 +124,7 @@ def run_statuses(startfunc):
                     iters.append(iter_)
                     iters.append(value)
                     break
-        iters.append(choice(statuses)())
+        iters.append(choice(utils.statuses)())
 
 
 if __name__ == "__main__":
