@@ -29,24 +29,25 @@ def pretty_progressbar(fraction, charsize):
 statuses = []
 transitions = []
 
-# A decorator to add a function to our statuses list.
 def status_func(func):
+    """A decorator to add a function to our statuses list."""
     global statuses
     statuses.append(func)
     return func
 
 def register_if_installed(command):
+    """Only install this status func if the command exists in PATH."""
     if call(["which", command], stdout=PIPE) == 0:
         return status_func
     else:
         return lambda x: x
-
-# A decorator to add a function to our transitions list.
 def transition_func(func):
+    """A decorator to add a function to our transitions list."""
     global transitions
     transitions.append(func)
     return func
 
-# This function allows us to set the text of the status line.
 def dwm_set_status(text):
+    """This function allows us to set the text of the status line."""
     check_call(["xsetroot", "-name", text])
+

@@ -10,12 +10,14 @@ STATUSDELAY = 30
 PREVIOUS = object()
 
 def animate(delay, text):
+    """Run an animator to the text."""
     previous = yield PREVIOUS
     animator = choice(utils.transitions)
     yield animator(previous, text)
     sleep(delay)
 
 def wait(delay, text):
+    """Wait before displaying the text."""
     yield text
     sleep(delay)
 
@@ -32,9 +34,9 @@ def wait(delay, text):
 # mpd status
 # free hard drive storage
 
-# Free memory function
 @utils.status_func
 def memory_free():
+    """Display the used RAM and Swap space."""
     yield animate(2, "Used RAM")
     
     # Parse the output of the "free" command. :(
@@ -53,6 +55,7 @@ def memory_free():
 
 @utils.register_if_installed("mpc")
 def mpd_np():
+    """Display the mpd status via mpc."""
     try:
         status_output = Popen(["mpc", "status"], stdout=PIPE).communicate()[0]
     except OSError:
@@ -71,6 +74,7 @@ def mpd_np():
 
 @utils.register_if_installed("acpi")
 def battery():
+    """Display the battery status via acpi."""
     try:
         status_output = Popen(["acpi"], stdout=PIPE).communicate()[0]
     except OSError:
@@ -85,6 +89,7 @@ def battery():
 
 @utils.transition_func
 def shoot(prev, new):
+    """Animate a transition with a flying star."""
     d = 0.05
     icon = "*"
     length = max(len(prev), len(new))
@@ -97,16 +102,19 @@ def shoot(prev, new):
     yield wait(1, new.lstrip())
 
 def startup_animation():
+    """Animate the startup of the script."""
     yield wait(1, "DWM Status Bar Animator")
     yield animate(1, "a silly script by timonator")
 
 def run_animation(iter_, previous):
+    """Run an animation."""
     yield previous
     yield iter_.send(previous)
     for value in iter_:
         yield value
 
 def run_statuses(startfunc):
+    """The 'main loop' of dwmstat."""
     iters = [startfunc()]
     previous = ''
 
