@@ -1,7 +1,7 @@
 # coding: utf-8
 # The dwmstatusline utility module.
 # Written by Timo Paulssen
-from subprocess import Popen, call, PIPE
+from subprocess import check_call, call, PIPE
 
 def pretty_progressbar(fraction, charsize):
     """Generate a progressbar with accompanying percentage value.
@@ -49,4 +49,4 @@ def transition_func(func):
 
 # This function allows us to set the text of the status line.
 def dwm_set_status(text):
-    Popen(["xsetroot", "-name", text])
+    check_call(["xsetroot", "-name", text])
