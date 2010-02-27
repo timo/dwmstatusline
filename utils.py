@@ -69,3 +69,37 @@ def dwm_set_status(text):
     """This function allows us to set the text of the status line."""
     check_call(["xsetroot", "-name", text])
 
+class DelayedUpdateDisplay(object):
+    delay = 300
+    def __init__(self):
+        if not self.checkInstall():
+            return
+        global statuses
+        self.last_update = 0
+        statuses.append(self)
+
+    def checkInstall(self):
+        """Check wether to install this status func."""
+        print "checkInstall(self) not implemented by %s." % (self.__class__.__name__,)
+        return False
+
+    def __call__(self):
+        """Do the displaying."""
+        if time.time() > self.last_update + self.delay:
+            self.__update__()
+            return
+        
+        for res in self.call():
+            yield res
+
+    def call(self):
+        yield wait(1, "call(self) not implemented by %s." % (self.__class__.__name__),)
+        print "call(self) not implemented by %s." % (self.__class__.__name__,)
+
+    def __update__(self):
+        self.update()
+        self.last_update = time.time()
+
+    def update(self):
+        """Update the data."""
+        print "update(self) not implemented by %s." % (self.__class__.__name__,)
