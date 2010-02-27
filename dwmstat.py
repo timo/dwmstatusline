@@ -68,6 +68,12 @@ def battery():
     
     yield animate(10, status_output.split("\n")[0])
 
+@utils.status_func
+def wallclock():
+    yield wait(5, "Wallclock")
+    for i in range(10):
+        yield wait(5, time.strftime("%H:%M:%S"))
+
 class NewsbeuterUnread(utils.DelayedUpdateDisplay):
     delay = 600
     def call(self):
