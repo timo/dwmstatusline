@@ -139,4 +139,18 @@ def run_statuses(startfunc):
 
 
 if __name__ == "__main__":
-    run_statuses(startup_animation)
+    try:
+        run_statuses(startup_animation)
+    except KeyboardInterrupt:
+        # say goodbye
+        utils.dwm_set_status("Goodbye.")
+        time.sleep(5)
+        utils.dwm_set_status("")
+    except Exception, e:
+        utils.dwm_set_status("dwmstat crashed: %r" % e)
+        time.sleep(5)
+        utils.dwm_set_status("")
+        raise
+    time.sleep(5)
+    # make sure to exit cleanly
+    utils.dwm_set_status("")
