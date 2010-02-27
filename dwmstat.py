@@ -72,7 +72,8 @@ def battery():
 def wallclock():
     yield wait(5, "Wallclock")
     for i in range(10):
-        yield wait(5, time.strftime("%H:%M:%S"))
+        yield wait(1, time.strftime("%H:%M:%S"))
+        time.sleep(1)
 
 class NewsbeuterUnread(utils.DelayedUpdateDisplay):
     delay = 600
