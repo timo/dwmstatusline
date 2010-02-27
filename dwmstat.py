@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # coding: utf-8
 from subprocess import Popen, call, PIPE
 from random import choice
