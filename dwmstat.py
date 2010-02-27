@@ -1,25 +1,10 @@
 # coding: utf-8
-from subprocess import Popen, PIPE
-from time import sleep
+from subprocess import Popen, call, PIPE
 from random import choice
-
 import utils
+from utils import animate, wait, PREVIOUS
+import time
 
-STATUSDELAY = 30
-
-PREVIOUS = object()
-
-def animate(delay, text):
-    """Run an animator to the text."""
-    previous = yield PREVIOUS
-    animator = choice(utils.transitions)
-    yield animator(previous, text)
-    sleep(delay)
-
-def wait(delay, text):
-    """Wait before displaying the text."""
-    yield text
-    sleep(delay)
 
 # install a few status functions
 

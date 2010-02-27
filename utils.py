@@ -2,6 +2,12 @@
 # The dwmstatusline utility module.
 # Written by Timo Paulssen
 from subprocess import check_call, call, PIPE
+import time
+from random import choice
+
+STATUSDELAY = 30
+
+PREVIOUS = object()
 
 def pretty_progressbar(fraction, charsize):
     """Generate a progressbar with accompanying percentage value.
@@ -25,6 +31,18 @@ def pretty_progressbar(fraction, charsize):
       "O",
       " " * bar2size,
       fraction * 100)
+
+def animate(delay, text):
+    """Run an animator to the text."""
+    previous = yield PREVIOUS
+    animator = choice(transitions)
+    yield animator(previous, text)
+    time.sleep(delay)
+
+def wait(delay, text):
+    """Wait before displaying the text."""
+    yield text
+    time.sleep(delay)
 
 statuses = []
 transitions = []
