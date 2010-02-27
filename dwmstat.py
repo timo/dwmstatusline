@@ -80,6 +80,7 @@ class NewsbeuterUnread(utils.DelayedUpdateDisplay):
     delay = 600
     def call(self):
         unread_text = Popen(["newsbeuter", "-x", "print-unread"], stdout=PIPE).communicate()[0]
+        if unread_text.startswith("Error:"): return
         unread_items = int(unread_text.split()[0])
         if unread_items > 0:
             yield animate(10, "Newsbeuter: %d unread news." % (unread_items,))
