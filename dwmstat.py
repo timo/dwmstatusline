@@ -95,6 +95,11 @@ class NewsbeuterUnread(utils.DelayedUpdateDisplay):
         return call(["which", "newsbeuter"], stdout=PIPE) == 0
 NewsbeuterUnread()
 
+@util.status_func
+def load_and_uptime():
+    """Display the output of uptime."""
+    yield wait(10, Popen(["uptime"], stdout=PIPE).communicate()[0])
+
 # install a few transition functions
 
 # These work in the same way as the status functions
